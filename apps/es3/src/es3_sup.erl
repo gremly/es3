@@ -28,7 +28,10 @@ start_link() ->
 
 %% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
 init([]) ->
-    {ok, { {one_for_all, 0, 1}, []} }.
+    SupervisorFlags = #{strategy => one_for_all, intensity => 0, period => 1},
+    ChildSpecs     = [#{id => es3_chunk, start => {es3_chunk, start_link, [es3_chunk]},
+                        restart => permanent}],
+    {ok, {SupervisorFlags, ChildSpecs}}.
 
 %%====================================================================
 %% Internal functions

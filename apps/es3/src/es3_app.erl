@@ -15,6 +15,9 @@
 %%====================================================================
 
 start(_StartType, _StartArgs) ->
+    Nodes = [node_a@gror, node_b@gror, node_c@gror],
+    lists:map(fun net_kernel:connect/1, Nodes),
+    es3_repo:init(),
     es3_sup:start_link().
 
 %%--------------------------------------------------------------------
