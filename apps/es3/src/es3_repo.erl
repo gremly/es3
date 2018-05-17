@@ -31,7 +31,7 @@ write(FileName, Nodes) ->
     {atomic, Res} = mnesia:transaction(Fun),
     Res.
 
--spec read(FileName :: any()) -> any() | {error, Reason :: any()}.
+-spec read(FileName :: any()) -> list() | {error, Reason :: any()}.
 read(FileName) ->
     Fun = fun() -> mnesia:read({meta_files, FileName}) end,
     {atomic, Res} = mnesia:transaction(Fun),
