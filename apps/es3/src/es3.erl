@@ -14,8 +14,7 @@
 
 write(Name, Object) when is_binary(Object) ->
     Chunks = build_chunks(Object),
-    io:format("~p Chunks obtained. ~n", [length(Chunks)]),
-    ok.
+    es3_cluster:write(Name, Chunks).
 
 -spec read(Name) -> Object when
       Name   :: iodata(),
