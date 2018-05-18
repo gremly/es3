@@ -25,3 +25,11 @@ Using the es3 API we can store and retrive our previous file.
     (node_a@localhost)2> es3:write("FileName.ext", MyFile).
 
     (node_a@localhost)3> es3:read("FileName.ext").
+
+
+TODO
+----
+
+- [ ] Expose HTTP interface.
+- [ ] Add tests with common test.
+- [ ] Add distributed tests.
