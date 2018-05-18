@@ -14,15 +14,9 @@ read(Name) ->
     case es3_repo:read(Name) of
         [] -> {error, file_not_found};
         [{_, Name, NodesChunks}] ->
-            %Chunks = lists:map(fun({Node, Keys}) -> rpc:call(Node, es3_chunk, list, [Keys]) end, NodesChunks),
-            ChunksMap = lists:foldl(fun({Node, Keys}, Acc) ->
-                                         Nodes = [Node | maps:get(nodes, Acc)],
-                                         KeysList  = maps:get(keys, Acc) ++ Keys,
-                                         Map   = maps:put(nodes, Nodes, Acc),
-                                         maps:put(keys, KeysList, Map)
-                                 end, #{nodes => [], keys => []}, NodesChunks),
-            {Res, _} = rpc:multicall(maps:get(nodes, ChunksMap), es3_chunk, list, [maps:get(keys, ChunksMap)]),
-            SortedList = lists:sort(fun({KeyA, _}, {KeyB, _}) -> KeyA > KeyB end, lists:flatten(Res)),
+            NodesChunksMap = map_nodes_chunks(NodesChunks),
+            {ChunksFound, _} = read_nodes(NodesChunksMap),
+            SortedList = sort_chunks_by_key(lists:flatten(ChunksFound)),
             BinList = lists:map(fun({_, BinChunk}) -> BinChunk end, SortedList),
             binary:list_to_bin(BinList)
     end.
@@ -62,3 +56,26 @@ gen_key(Prefix) ->
 timestamp() ->
     {Mega, Sec, Micro} = os:timestamp(),
     (Mega*1000000 + Sec)*1000 + Micro.
+
+map_nodes_chunks(NodesChunks) ->
+    lists:foldl(fun({Node, Keys}, Acc) ->
+                    Nodes = [Node | maps:get(nodes, Acc)],
+                    KeysList  = maps:get(keys, Acc) ++ Keys,
+                    Map   = maps:put(nodes, Nodes, Acc),
+                    maps:put(keys, KeysList, Map)
+                    end, #{nodes => [], keys => []},
+                NodesChunks).
+
+read_nodes(NodesChunksMap) ->
+    rpc:multicall(
+      maps:get(nodes, NodesChunksMap),
+      es3_chunk,
+      list,
+      [maps:get(keys, NodesChunksMap)]).
+
+sort_chunks_by_key(ChunksFound) ->
+    lists:sort(
+      fun({KeyA, _}, {KeyB, _}) ->
+            KeyA > KeyB
+      end,
+      ChunksFound).
