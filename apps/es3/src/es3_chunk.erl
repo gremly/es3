@@ -41,7 +41,7 @@ start_link(_) ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init(_) ->
-    {ok, _} = dets:open_file(?CHUNKS_TABLE, [{type, set}]),
+    {ok, _} = dets:open_file(?CHUNKS_TABLE, [{type, set}, {file, "priv/" ++ node()}]),
     {ok, no_state}.
 
 %% -------------------------------------------------------------
