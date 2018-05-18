@@ -10,12 +10,16 @@
 
 -export([read/1, delete/1, list/1, write/2]).
 
+%% -------------------------------------------------------------
 %% Constants definition
+%% -------------------------------------------------------------
 
 -define(SERVER, ?MODULE).
 -define(CHUNKS_TABLE, file_chunks).
 
+%% -------------------------------------------------------------
 %% gen_server public API
+%% -------------------------------------------------------------
 
 -spec write(Key :: any(), Chunk :: binary()) -> ok | {error, Reason :: any()}.
 write(Key, Chunk) ->
@@ -40,7 +44,9 @@ init(_) ->
     {ok, _} = dets:open_file(?CHUNKS_TABLE, [{type, set}]),
     {ok, no_state}.
 
+%% -------------------------------------------------------------
 %% gen_server callbacks
+%% -------------------------------------------------------------
 
 handle_cast({write_chunk, Key, Chunk}, State) ->
     dets:insert(?CHUNKS_TABLE, {Key, Chunk}),
