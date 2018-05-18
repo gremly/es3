@@ -5,7 +5,8 @@
 -behaviour(gen_server).
 
 -export([start_link/1, init/1, terminate/2,
-		handle_call/3, handle_cast/2]).
+        handle_call/3, handle_cast/2, handle_info/2,
+        code_change/3]).
 
 -export([read/1, delete/1, list/1, write/2]).
 
@@ -33,7 +34,7 @@ delete(Key) ->
     gen_server:cast(?SERVER, {delete_chunk, Key}).
 
 start_link(_) ->
-    gen_server:start_link({local, ?SERVER}, ?MODULE, [], [debug, {log, trace}]).
+    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init(_) ->
     {ok, _} = dets:open_file(?CHUNKS_TABLE, [{type, set}]),
@@ -56,6 +57,10 @@ handle_call({get_chunk, Key}, _From, State) ->
 handle_call({list_chunks, Keys}, _From, State) ->
     List = lists:map(fun get_by_key/1, Keys),
     {reply, lists:filter(fun (Element) -> Element =/= nil end, List), State}.
+
+handle_info(_, State) -> {noreply, State}.
+
+code_change(_Old, State, _Extra) -> {ok, State}.
 
 terminate(_Reason, _State) -> ok.
 
