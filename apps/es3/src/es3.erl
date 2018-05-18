@@ -3,15 +3,14 @@
 
 -module(es3).
 
--export([read/1, delete/1, write/2]).
+-export([read/1, delete/1, get_config/1, write/2]).
 
--define(CHUNKS, 5).
+-define(CHUNKS, get_config(chunks_number)).
 
 -spec write(Name, Object) -> Res when
       Name   :: iodata(),
       Object :: binary(),
       Res    :: ok | {error, Reason :: any()}.
-
 write(Name, Object) when is_binary(Object) ->
     Chunks = build_chunks(Object),
     es3_cluster:write(Name, Chunks).
@@ -19,16 +18,19 @@ write(Name, Object) when is_binary(Object) ->
 -spec read(Name) -> Object when
       Name   :: iodata(),
       Object :: binary() | {error, Reason :: any()}.
-
 read(Name) ->
-    <<"some binary">>.
+    es3_cluster:read(Name).
 
 -spec delete(Name) -> Res when
       Name :: iodata(),
       Res  :: ok | {error, Reason :: any()}.
-
 delete(Name) ->
-    ok.
+    es3_cluster:delete(Name).
+
+-spec get_config(Key :: atom()) -> Value :: any().
+get_config(Key) ->
+    {ok, Value} = application:get_env(es3, Key),
+    Value.
 
 %% -----------------------------------------
 %% Internal functions
